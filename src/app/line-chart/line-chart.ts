@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
-import type { EChartsCoreOption } from 'echarts/core';
+import { EChartsCoreOption } from 'echarts/core';
 import { NgxEchartsDirective } from 'ngx-echarts';
 
 @Component({
   imports: [NgxEchartsDirective],
-  selector: 'app-streaming-chart',
-  styleUrl: './streaming-chart.scss',
-  templateUrl: './streaming-chart.html',
+  selector: 'app-line-chart',
+  styleUrl: './line-chart.scss',
+  templateUrl: './line-chart.html',
 })
-export class StreamingChart {
+export class LineChart {
   chartOption: EChartsCoreOption = {
     xAxis: {
       type: 'category',

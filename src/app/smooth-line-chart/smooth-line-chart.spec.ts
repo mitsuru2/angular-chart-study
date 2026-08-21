@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { StreamingChart } from './streaming-chart';
+import { SmoothLineChart } from './smooth-line-chart';
 
-describe('StreamingChart', () => {
-  let component: StreamingChart;
-  let fixture: ComponentFixture<StreamingChart>;
+describe('SmoothLineChart', () => {
+  let component: SmoothLineChart;
+  let fixture: ComponentFixture<SmoothLineChart>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StreamingChart],
+      imports: [SmoothLineChart],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(StreamingChart);
+    fixture = TestBed.createComponent(SmoothLineChart);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

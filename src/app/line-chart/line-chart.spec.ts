@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { StreamingChart } from './streaming-chart';
+import { LineChart } from './line-chart';
 
-describe('StreamingChart', () => {
-  let component: StreamingChart;
-  let fixture: ComponentFixture<StreamingChart>;
+describe('LineChart', () => {
+  let component: LineChart;
+  let fixture: ComponentFixture<LineChart>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StreamingChart],
+      imports: [LineChart],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(StreamingChart);
+    fixture = TestBed.createComponent(LineChart);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

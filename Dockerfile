@@ -8,15 +8,25 @@
 FROM node:26-trixie-slim
 
 # Install OS-level dependencies.
-# - Git: It should be installed to use git commands in container or via VSCode remote 
+# - Git: It should be installed to use git commands in container or via VSCode remote
 #        development extension.
+# - locales: The slim base image only ships the C/POSIX/C.UTF-8 locales. VS Code's
+#            Dev Containers extension forwards the host locale (en_US.UTF-8) to the
+#            integrated terminal, which otherwise fails with "setlocale" warnings.
 # Note: After installing packages, we clean up the apt cache to reduce the image size.
 RUN apt-get update && apt-get install -y \
     git \
     sudo \
     curl \
     ca-certificates \
+    locales \
+    && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
+    && locale-gen \
     && rm -rf /var/lib/apt/lists/*
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 # Enable sudo command to user 'node' w/o password.
 # mkdir -p: Create all intermediate directories at once.

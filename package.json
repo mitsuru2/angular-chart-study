@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "npx ng",
-    "start": "npx ng serve",
-    "build": "npx ng build",
-    "watch": "npx ng build --watch --configuration development",
+    "start": "npx ng serve --define PRIMENG_LICENSE_KEY=\"'$PRIMENG_LICENSE_KEY'\"",
+    "build": "npx ng build --define PRIMENG_LICENSE_KEY=\"'$PRIMENG_LICENSE_KEY'\"",
+    "watch": "npx ng build --watch --configuration development --define PRIMENG_LICENSE_KEY=\"'$PRIMENG_LICENSE_KEY'\"",
     "test": "npx ng test"
   },
   "private": true,
@@ -17,6 +17,9 @@
     "@angular/forms": "^22.1.0",
     "@angular/platform-browser": "^22.1.0",
     "@angular/router": "^22.1.0",
+    "@primeicons/angular": "^8.0.0",
+    "@primeuix/themes": "^3.0.0",
+    "primeng": "^22.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

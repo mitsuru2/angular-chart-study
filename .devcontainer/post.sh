@@ -3,6 +3,11 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SECRETS_ENV="$SCRIPT_DIR/secrets.env"
 
+# Claude Codeログイン
+sudo mkdir -p /home/node/.claude
+sudo chown -R node:node /home/node/.claude
+
+# secrets.env が存在する場合は読み込む
 if [ -f "$SECRETS_ENV" ]; then
   echo ""
   echo "=== secrets.env を読み込み中 ==="

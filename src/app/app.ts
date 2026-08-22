@@ -1,12 +1,24 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { RouterLink, RouterOutlet } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { DividerModule } from 'primeng/divider';
+
+interface PageLink {
+  label: string;
+  id: string;
+}
 
 @Component({
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, RouterLink, ButtonModule, DividerModule],
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',
 })
 export class App {
-  protected readonly title = signal('angular-chart-study');
+  protected readonly pageLinks: PageLink[] = [
+    { label: 'Line Chart', id: 'line-chart' },
+    { label: 'Step Line Chart', id: 'step-line-chart' },
+    { label: 'Smooth Line Chart', id: 'smooth-line-chart' },
+    { label: 'Streaming Chart', id: 'streaming-chart' },
+  ];
 }

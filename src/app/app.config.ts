@@ -5,11 +5,11 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import * as echarts from 'echarts/core';
 import { LineChart } from 'echarts/charts';
-import { GridComponent } from 'echarts/components';
+import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components';
 import { SVGRenderer } from 'echarts/renderers';
 import { provideEchartsCore } from 'ngx-echarts';
 
-echarts.use([LineChart, GridComponent, SVGRenderer]);
+echarts.use([LineChart, GridComponent, LegendComponent, TooltipComponent, SVGRenderer]);
 
 export const appConfig: ApplicationConfig = {
   providers: [

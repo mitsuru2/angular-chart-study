@@ -20,6 +20,9 @@ export const routes: Routes = [
   },
   {
     path: 'streaming-chart',
-    loadComponent: () => import('./streaming-chart/streaming-chart').then((m) => m.StreamingChart),
+    loadComponent: () =>
+      import('./streaming-chart-driver/streaming-chart-driver').then(
+        (m) => m.StreamingChartDriver,
+      ),
   },
 ];

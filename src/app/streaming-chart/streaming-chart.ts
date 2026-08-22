@@ -1,10 +1,6 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { NgxEchartsDirective } from 'ngx-echarts';
-
-interface DataItemData {
-  name: string;
-  value: [string, number];
-}
+import { DataItemData, SeriesConfig } from './streaming-chart.interface';
 
 @Component({
   imports: [NgxEchartsDirective],
@@ -12,93 +8,89 @@ interface DataItemData {
   styleUrl: './streaming-chart.scss',
   templateUrl: './streaming-chart.html',
 })
-export class StreamingChart implements OnInit {
-  private now = new Date(1997, 9, 3);
-  private oneDay = 24 * 3600 * 1000;
-  private value = Math.random() * 1000;
+export class StreamingChart {
+  seriesConfig = input.required<SeriesConfig[]>();
+  seriesData = input.required<DataItemData[][]>();
 
-  private data = signal<DataItemData[]>([]);
+  protected option = computed(() => {
+    const configs = this.seriesConfig();
 
-  ngOnInit() {
-    const initialData: DataItemData[] = [];
-    for (var i = 0; i < 200; i++) {
-      initialData.push(this.randomData());
-    }
-    this.data.set(initialData);
+    const yAxis = configs.map((config, index) =>
+      config.labels
+        ? {
+            type: 'value',
+            position: 'left' as const,
+            offset: index * 60,
+            min: 0,
+            max: config.labels.length - 1,
+            interval: 1,
+            splitLine: { show: false },
+            axisLabel: {
+              formatter: (value: number) => config.labels?.[value] ?? '',
+            },
+          }
+        : {
+            type: 'value',
+            position: 'left' as const,
+            offset: index * 60,
+            boundaryGap: [0, '100%'],
+            splitLine: { show: false },
+          },
+    );
 
-    setInterval(() => {
-      this.data.update((current) => [
-        ...current.slice(1),
-        ...Array.from({ length: 1 }, () => this.randomData()),
-      ]);
-    }, 200);
-  }
+    const series = configs.map((config, index) => ({
+      name: config.name,
+      type: 'line',
+      step: config.labels ? ('end' as const) : undefined,
+      showSymbol: false,
+      yAxisIndex: index,
+      data: [] as DataItemData[],
+    }));
 
-  private randomData(): DataItemData {
-    this.now = new Date(+this.now + this.oneDay);
-    this.value = this.value + Math.random() * 21 - 10;
     return {
-      name: this.now.toString(),
-      value: [
-        [this.now.getFullYear(), this.now.getMonth() + 1, this.now.getDate()].join('/'),
-        Math.round(this.value),
-      ],
+      legend: {
+        top: 10,
+        data: configs.map((config) => config.name),
+      },
+      tooltip: {
+        trigger: 'axis',
+        formatter: (params: any[]) => {
+          const date = new Date(params[0].name);
+          const lines = params.map((param) => {
+            const config = configs[param.seriesIndex];
+            const value = param.value[1];
+            const label = config.labels ? (config.labels[value] ?? value) : value;
+            return `${param.marker}${param.seriesName}: ${label}`;
+          });
+          return [
+            `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`,
+            ...lines,
+          ].join('<br/>');
+        },
+        axisPointer: {
+          animation: false,
+        },
+      },
+      grid: {
+        top: 50,
+        left: 50 + configs.length * 60,
+        right: 20,
+        bottom: 40,
+      },
+      xAxis: {
+        type: 'time',
+        splitLine: {
+          show: false,
+        },
+      },
+      yAxis,
+      series,
+      animationDurationUpdate: 200,
+      animationEasingUpdate: 'linear' as const,
     };
-  }
-
-  protected option = {
-    title: {
-      text: 'Dynamic Data & Time Axis',
-    },
-    tooltip: {
-      trigger: 'axis',
-      formatter: function (params: DataItemData[]) {
-        const param = params[0];
-        var date = new Date(param.name);
-        return (
-          date.getDate() +
-          '/' +
-          (date.getMonth() + 1) +
-          '/' +
-          date.getFullYear() +
-          ' : ' +
-          param.value[1]
-        );
-      },
-      axisPointer: {
-        animation: false,
-      },
-    },
-    xAxis: {
-      type: 'time',
-      splitLine: {
-        show: false,
-      },
-    },
-    yAxis: {
-      type: 'value',
-      boundaryGap: [0, '100%'],
-      splitLine: {
-        show: false,
-      },
-    },
-    series: [
-      {
-        name: 'Fake Data',
-        type: 'line',
-        showSymbol: false,
-        data: [] as DataItemData[],
-      },
-    ],
-    animationDurationUpdate: 200,
-    animationEasingUpdate: 'linear' as const,
-  };
+  });
 
   protected mergeOption = computed(() => ({
-    series: [
-      {
-        data: this.data(),
-      },
-    ],
+    series: this.seriesData().map((data) => ({ data })),
   }));
 }

@@ -68,7 +68,7 @@ export class StreamingChartEx {
         },
         axisPointer: { animation: false },
       },
-      grid: { top: 50, left: 50 + (maxIndex + 1) * 60, right: 20, bottom: 40 },
+      grid: { top: 50, left: 50 + (maxIndex + 1) * 60, right: 20, bottom: 80 },
       xAxis: {
         type: 'time' as const,
         splitLine: { show: false },
@@ -79,6 +79,7 @@ export class StreamingChartEx {
       },
       yAxis,
       series,
+      dataZoom: [{ type: 'slider' as const, xAxisIndex: 0, bottom: 10, height: 24 }],
       animationDurationUpdate: 200,
       animationEasingUpdate: 'linear' as const,
     };

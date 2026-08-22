@@ -6,6 +6,8 @@ import {
   StreamingChartExSeriesData,
 } from '../streaming-chart-ex/streaming-chart-ex.interface';
 
+const INTERVAL_MS = 200;
+
 @Component({
   imports: [StreamingChartEx],
   selector: 'app-streaming-chart-ex-driver',
@@ -47,7 +49,7 @@ export class StreamingChartExDriver implements OnInit, OnDestroy {
         [...current[0], nextB],
         [...current[1], nextA],
       ]);
-    }, 200);
+    }, INTERVAL_MS);
   }
 
   ngOnDestroy() {
@@ -55,7 +57,7 @@ export class StreamingChartExDriver implements OnInit, OnDestroy {
   }
 
   private advanceTime(): number {
-    this.now += 1000;
+    this.now += INTERVAL_MS;
     return this.now;
   }
 

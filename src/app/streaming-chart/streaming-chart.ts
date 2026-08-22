@@ -21,7 +21,7 @@ export class StreamingChart implements OnInit {
 
   ngOnInit() {
     const initialData: DataItemData[] = [];
-    for (var i = 0; i < 1000; i++) {
+    for (var i = 0; i < 200; i++) {
       initialData.push(this.randomData());
     }
     this.data.set(initialData);
@@ -46,7 +46,7 @@ export class StreamingChart implements OnInit {
     };
   }
 
-  protected option = computed(() => ({
+  protected option = {
     title: {
       text: 'Dynamic Data & Time Axis',
     },
@@ -87,6 +87,16 @@ export class StreamingChart implements OnInit {
         name: 'Fake Data',
         type: 'line',
         showSymbol: false,
+        data: [] as DataItemData[],
+      },
+    ],
+    animationDurationUpdate: 200,
+    animationEasingUpdate: 'linear' as const,
+  };
+
+  protected mergeOption = computed(() => ({
+    series: [
+      {
         data: this.data(),
       },
     ],

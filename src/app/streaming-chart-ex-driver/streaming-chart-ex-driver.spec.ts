@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideEchartsCore } from 'ngx-echarts';
 import { echarts } from '../echarts-setup';
-import { LineChart } from './line-chart';
+import { StreamingChartExDriver } from './streaming-chart-ex-driver';
 
-describe('LineChart', () => {
-  let component: LineChart;
-  let fixture: ComponentFixture<LineChart>;
+describe('StreamingChartExDriver', () => {
+  let component: StreamingChartExDriver;
+  let fixture: ComponentFixture<StreamingChartExDriver>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LineChart],
+      imports: [StreamingChartExDriver],
       providers: [provideEchartsCore({ echarts })],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(LineChart);
+    fixture = TestBed.createComponent(StreamingChartExDriver);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

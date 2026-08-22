@@ -20,5 +20,6 @@ export class App {
     { label: 'Step Line Chart', id: 'step-line-chart' },
     { label: 'Smooth Line Chart', id: 'smooth-line-chart' },
     { label: 'Streaming Chart', id: 'streaming-chart' },
+    { label: 'Streaming Chart Ex', id: 'streaming-chart-ex' },
   ];
 }

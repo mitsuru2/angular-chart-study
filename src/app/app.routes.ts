@@ -25,4 +25,11 @@ export const routes: Routes = [
         (m) => m.StreamingChartDriver,
       ),
   },
+  {
+    path: 'streaming-chart-ex',
+    loadComponent: () =>
+      import('./streaming-chart-ex-driver/streaming-chart-ex-driver').then(
+        (m) => m.StreamingChartExDriver,
+      ),
+  },
 ];

@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideEchartsCore } from 'ngx-echarts';
+import { echarts } from '../echarts-setup';
 import { StreamingChartDriver } from './streaming-chart-driver';
 
 describe('StreamingChartDriver', () => {
@@ -8,6 +10,7 @@ describe('StreamingChartDriver', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [StreamingChartDriver],
+      providers: [provideEchartsCore({ echarts })],
     }).compileComponents();
 
     fixture = TestBed.createComponent(StreamingChartDriver);

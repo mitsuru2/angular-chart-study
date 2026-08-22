@@ -3,8 +3,7 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./streaming-chart-driver/streaming-chart-driver').then((m) => m.StreamingChartDriver),
+    loadComponent: () => import('./line-chart/line-chart').then((m) => m.LineChart),
   },
   {
     path: 'line-chart',
@@ -18,5 +17,9 @@ export const routes: Routes = [
     path: 'smooth-line-chart',
     loadComponent: () =>
       import('./smooth-line-chart/smooth-line-chart').then((m) => m.SmoothLineChart),
+  },
+  {
+    path: 'streaming-chart',
+    loadComponent: () => import('./streaming-chart/streaming-chart').then((m) => m.StreamingChart),
   },
 ];

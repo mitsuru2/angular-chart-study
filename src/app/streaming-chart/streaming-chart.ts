@@ -1,6 +1,10 @@
-import { Component } from '@angular/core';
-import type { EChartsCoreOption } from 'echarts/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { NgxEchartsDirective } from 'ngx-echarts';
+
+interface DataItemData {
+  name: string;
+  value: [string, number];
+}
 
 @Component({
   imports: [NgxEchartsDirective],
@@ -8,20 +12,83 @@ import { NgxEchartsDirective } from 'ngx-echarts';
   styleUrl: './streaming-chart.scss',
   templateUrl: './streaming-chart.html',
 })
-export class StreamingChart {
-  chartOption: EChartsCoreOption = {
+export class StreamingChart implements OnInit {
+  private now = new Date(1997, 9, 3);
+  private oneDay = 24 * 3600 * 1000;
+  private value = Math.random() * 1000;
+
+  private data = signal<DataItemData[]>([]);
+
+  ngOnInit() {
+    const initialData: DataItemData[] = [];
+    for (var i = 0; i < 1000; i++) {
+      initialData.push(this.randomData());
+    }
+    this.data.set(initialData);
+
+    setInterval(() => {
+      this.data.update((current) => [
+        ...current.slice(1),
+        ...Array.from({ length: 1 }, () => this.randomData()),
+      ]);
+    }, 200);
+  }
+
+  private randomData(): DataItemData {
+    this.now = new Date(+this.now + this.oneDay);
+    this.value = this.value + Math.random() * 21 - 10;
+    return {
+      name: this.now.toString(),
+      value: [
+        [this.now.getFullYear(), this.now.getMonth() + 1, this.now.getDate()].join('/'),
+        Math.round(this.value),
+      ],
+    };
+  }
+
+  protected option = computed(() => ({
+    title: {
+      text: 'Dynamic Data & Time Axis',
+    },
+    tooltip: {
+      trigger: 'axis',
+      formatter: function (params: DataItemData[]) {
+        const param = params[0];
+        var date = new Date(param.name);
+        return (
+          date.getDate() +
+          '/' +
+          (date.getMonth() + 1) +
+          '/' +
+          date.getFullYear() +
+          ' : ' +
+          param.value[1]
+        );
+      },
+      axisPointer: {
+        animation: false,
+      },
+    },
     xAxis: {
-      type: 'category',
-      data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      type: 'time',
+      splitLine: {
+        show: false,
+      },
     },
     yAxis: {
       type: 'value',
+      boundaryGap: [0, '100%'],
+      splitLine: {
+        show: false,
+      },
     },
     series: [
       {
-        data: [820, 932, 901, 934, 1290, 1330, 1320],
+        name: 'Fake Data',
         type: 'line',
+        showSymbol: false,
+        data: this.data(),
       },
     ],
-  };
+  }));
 }

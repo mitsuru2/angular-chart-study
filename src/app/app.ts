@@ -1,13 +1,23 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { LineChart } from './line-chart/line-chart';
-import { StepLineChart } from './step-line-chart/step-line-chart';
-import { SmoothLineChart } from './smooth-line-chart/smooth-line-chart';
+import { RouterLink, RouterOutlet } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { DividerModule } from 'primeng/divider';
+
+interface PageLink {
+  label: string;
+  id: string;
+}
 
 @Component({
-  imports: [RouterOutlet, LineChart, StepLineChart, SmoothLineChart],
+  imports: [RouterOutlet, RouterLink, ButtonModule, DividerModule],
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',
 })
-export class App {}
+export class App {
+  protected readonly pageLinks: PageLink[] = [
+    { label: 'Line Chart', id: 'line-chart' },
+    { label: 'Step Line Chart', id: 'step-line-chart' },
+    { label: 'Smooth Line Chart', id: 'smooth-line-chart' },
+  ];
+}

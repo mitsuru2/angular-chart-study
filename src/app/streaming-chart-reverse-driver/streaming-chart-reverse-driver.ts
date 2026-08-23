@@ -1,4 +1,7 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 import { StreamingChartReverse } from '../streaming-chart-reverse/streaming-chart-reverse';
 import { ChartPointData, ChartSeriesData } from '../model/chart-data.interface';
 
@@ -12,7 +15,7 @@ const STATUS_DICT: Record<number, string> = {
 };
 
 @Component({
-  imports: [StreamingChartReverse],
+  imports: [StreamingChartReverse, ToggleSwitch, ReactiveFormsModule],
   selector: 'app-streaming-chart-reverse-driver',
   styleUrl: './streaming-chart-reverse-driver.scss',
   templateUrl: './streaming-chart-reverse-driver.html',
@@ -21,8 +24,14 @@ export class StreamingChartReverseDriver implements OnInit, OnDestroy {
   private now = Date.now();
   private sensorValue = Math.random() * 100;
   private statusValue = 0;
+  private extraValue = Math.random() * 30;
   private intervalId?: ReturnType<typeof setInterval>;
 
+  // Always defined for all 3 series; `seriesData` below is always kept in sync with
+  // this (data for "Extra" keeps being generated regardless of `showExtraSeries`).
+  // `visibleSeriesConfig`/`visibleSeriesData` are what actually gets passed to the
+  // chart, filtering "Extra" in or out by the toggle without touching this array's
+  // index alignment for Sensor/Status.
   protected seriesConfig: ChartSeriesData[] = [
     {
       name: 'Sensor',
@@ -36,20 +45,40 @@ export class StreamingChartReverseDriver implements OnInit, OnDestroy {
       dict: STATUS_DICT,
       yAxisIndex: 1,
     },
+    {
+      name: 'Extra',
+      color: 'rgba(60,180,90,0.8)',
+      range: { min: 0, max: 30 },
+      yAxisIndex: 2,
+    },
   ];
-  protected seriesData = signal<ChartPointData[][]>([[], []]);
+  protected seriesData = signal<ChartPointData[][]>([[], [], []]);
+
+  protected showExtraSeriesControl = new FormControl(false, { nonNullable: true });
+  private showExtraSeries = toSignal(this.showExtraSeriesControl.valueChanges, {
+    initialValue: this.showExtraSeriesControl.value,
+  });
+
+  protected visibleSeriesConfig = computed(() =>
+    this.showExtraSeries() ? this.seriesConfig : this.seriesConfig.slice(0, 2),
+  );
+  protected visibleSeriesData = computed(() =>
+    this.showExtraSeries() ? this.seriesData() : this.seriesData().slice(0, 2),
+  );
 
   ngOnInit() {
     this.intervalId = setInterval(() => {
       const timestamp = this.advanceTime();
       const nextSensor = this.nextSensor(timestamp);
       const nextStatus = this.nextStatus(timestamp);
+      const nextExtra = this.nextExtra(timestamp);
       // Append-only: StreamingChartReverse relies on each point's array index staying
       // stable forever so its update animation reads as a rigid slide rather than
       // per-point value tweening.
       this.seriesData.update((current) => [
         [...current[0], nextSensor],
         [...current[1], nextStatus],
+        [...current[2], nextExtra],
       ]);
     }, INTERVAL_MS);
   }
@@ -73,5 +102,10 @@ export class StreamingChartReverseDriver implements OnInit, OnDestroy {
       this.statusValue = Math.floor(Math.random() * 4);
     }
     return { timestamp, value: this.statusValue };
+  }
+
+  private nextExtra(timestamp: number): ChartPointData {
+    this.extraValue = Math.min(30, Math.max(0, this.extraValue + Math.random() * 6 - 3));
+    return { timestamp, value: Math.round(this.extraValue) };
   }
 }

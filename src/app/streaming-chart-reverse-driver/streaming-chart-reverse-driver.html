@@ -1,1 +1,9 @@
-<app-streaming-chart-reverse [seriesConfig]="seriesConfig" [seriesData]="seriesData()" />
+<label>
+  <p-toggleswitch [formControl]="showExtraSeriesControl" />
+  Show extra series
+</label>
+
+<app-streaming-chart-reverse
+  [seriesConfig]="visibleSeriesConfig()"
+  [seriesData]="visibleSeriesData()"
+/>

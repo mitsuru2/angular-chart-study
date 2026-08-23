@@ -39,4 +39,11 @@ export const routes: Routes = [
         (m) => m.StreamingChartReverseDriver,
       ),
   },
+  {
+    path: 'normal-line-chart',
+    loadComponent: () =>
+      import('./normal-line-chart-driver/normal-line-chart-driver').then(
+        (m) => m.NormalLineChartDriver,
+      ),
+  },
 ];

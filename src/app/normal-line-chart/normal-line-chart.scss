@@ -1,0 +1,26 @@
+.legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px; // 凡例同士の間隔。ここを変更して調整する。
+  margin-bottom: 8px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 4px 8px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.legend-label {
+  font-size: 14px;
+}
+
+.demo-chart {
+  height: 400px;
+}

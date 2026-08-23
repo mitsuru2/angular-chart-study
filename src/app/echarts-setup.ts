@@ -1,5 +1,5 @@
 import * as echarts from 'echarts/core';
-import { LineChart } from 'echarts/charts';
+import { BarChart, LineChart } from 'echarts/charts';
 import {
   DataZoomSliderComponent,
   GridComponent,
@@ -10,6 +10,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 
 echarts.use([
   LineChart,
+  BarChart,
   GridComponent,
   LegendComponent,
   TooltipComponent,

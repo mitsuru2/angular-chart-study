@@ -1,0 +1,15 @@
+<div class="chart-row">
+  <app-cylinder-chart-box
+    [seriesConfig]="physicalSeriesConfig"
+    [data]="physicalData()"
+    unit="%"
+    [width]="300"
+    [height]="160"
+  />
+  <app-cylinder-chart-box
+    [seriesConfig]="discreteSeriesConfig"
+    [data]="discreteData()"
+    [width]="300"
+    [height]="160"
+  />
+</div>

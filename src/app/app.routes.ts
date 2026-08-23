@@ -21,9 +21,7 @@ export const routes: Routes = [
   {
     path: 'streaming-chart',
     loadComponent: () =>
-      import('./streaming-chart-driver/streaming-chart-driver').then(
-        (m) => m.StreamingChartDriver,
-      ),
+      import('./streaming-chart-driver/streaming-chart-driver').then((m) => m.StreamingChartDriver),
   },
   {
     path: 'streaming-chart-ex',
@@ -45,5 +43,10 @@ export const routes: Routes = [
       import('./normal-line-chart-driver/normal-line-chart-driver').then(
         (m) => m.NormalLineChartDriver,
       ),
+  },
+  {
+    path: 'cylinder-chart-grid',
+    loadComponent: () =>
+      import('./cylinder-chart-grid/cylinder-chart-grid').then((m) => m.CylinderChartGrid),
   },
 ];

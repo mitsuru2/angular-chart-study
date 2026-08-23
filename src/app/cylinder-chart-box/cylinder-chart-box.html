@@ -1,0 +1,13 @@
+<p-card>
+  <div class="param-grid" [style.width.px]="width()" [style.height.px]="height()">
+    <div class="param-name">{{ seriesConfig().name }}</div>
+    <div class="param-value">{{ displayValue() }}</div>
+    <app-single-bar-chart
+      class="chart-cell"
+      [seriesConfig]="seriesConfig()"
+      [data]="data()"
+      [width]="chartWidth()"
+      [height]="chartHeight()"
+    />
+  </div>
+</p-card>

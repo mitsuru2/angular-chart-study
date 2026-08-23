@@ -1,67 +1,80 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { NgxEchartsDirective } from 'ngx-echarts';
+import { CircleFill } from '@primeicons/angular/circle-fill';
 import { ChartPointData, ChartSeriesData } from '../model/chart-data.interface';
 
-// The X-axis always spans exactly this many seconds, anchored at [-WINDOW_SECONDS, 0]
-// (0 = now, the right edge) — it never grows or shrinks, even before this much data
-// has accumulated. `seriesData` itself is expected to only ever grow (points appended,
-// never dropped from the front) — see the class doc comment on `mergeOption` for why.
+// X軸は常にこの秒数ぶんの幅で、[-WINDOW_SECONDS, 0](0 = 現在、右端)に固定される。
+// - データがこの秒数ぶん溜まっていなくても伸び縮みしない。
+// - `seriesData` は常に増え続けるだけ(先頭の点が削除されることはない)
+//   --> mergeOption のコメントも参照。
 const WINDOW_SECONDS = 60;
 
-// Shape of the params ngx-echarts forwards unmodified from ECharts' native
-// 'legendselectchanged' event.
-interface LegendSelectChangedEvent {
-  name: string;
-  selected: Record<string, boolean>;
+// tooltip の formatter に渡ってくる ECharts の params のうち、実際に使う
+// フィールドだけを最小限に型付けしたもの。
+interface TooltipParam {
+  marker: string; // 凡例と同じ色のマーカー(丸印)を表すHTML文字列。
+  seriesName: string; // 系列名(`ChartSeriesData.name`)。
+  value: [number, number]; // データポイントの座標 [X, Y] 。
 }
 
 @Component({
-  imports: [NgxEchartsDirective],
+  imports: [NgxEchartsDirective, CircleFill],
   selector: 'app-streaming-chart-reverse',
   styleUrl: './streaming-chart-reverse.scss',
   templateUrl: './streaming-chart-reverse.html',
 })
 export class StreamingChartReverse {
+  private readonly className = 'StreamingChartReverse';
+
+  //
+  // 入力パラメータ
+  //
   seriesConfig = input.required<ChartSeriesData[]>();
   seriesData = input.required<ChartPointData[][]>();
 
-  // Series names most-recently-clicked-in-legend first. Empty until the user clicks a
-  // legend entry, at which point that series' Y axis is promoted to the front (offset
-  // 0) and the rest keep their relative order — see `effectiveAxisOrder`.
+  // 凡例で直近にクリックされた系列名が先頭にくる配列。
+  // まだ何もクリックされていなければ空。クリックされると、その系列のY軸が先頭(offset 0)に昇格し、
+  // 残りは相対順序を保ったまま繰り上がる ── 詳細は `effectiveAxisOrder` を参照。
   private clickOrder = signal<string[]>([]);
 
-  // Always a dense permutation of every series name currently in `seriesConfig`: the
-  // clicked-order names first (filtered to ones that still exist), then the remaining
-  // series in their original `yAxisIndex` order. With no clicks yet, this exactly
-  // matches the series' original configured order.
+  // 現在の `seriesConfig` に存在する全系列名の「隙間のない」順列を常に返す:
+  // クリック履歴にある名前(存在しなくなったものは除外)を先頭に、残りは元々の
+  // `yAxisIndex` 順で続ける。一度もクリックされていなければ、これは系列の設定順そのものと一致する。
   private effectiveAxisOrder = computed(() => {
     const configs = this.seriesConfig();
     const names = new Set(configs.map((config) => config.name));
-    const baseline = [...configs]
-      .sort((a, b) => a.yAxisIndex - b.yAxisIndex)
-      .map((config) => config.name);
+    const baseline = this.baselineAxisOrder(configs);
     const clicked = this.clickOrder().filter((name) => names.has(name));
     return [...clicked, ...baseline.filter((name) => !clicked.includes(name))];
   });
 
-  protected onLegendSelectChanged(event: LegendSelectChangedEvent) {
-    this.clickOrder.update((order) => [event.name, ...order.filter((name) => name !== event.name)]);
+  protected onLegendItemClick(name: string) {
+    const location = `${this.className}.onLegendItemClick()`;
+    console.debug(`${location} ${name}`);
+    this.clickOrder.update((order) => [name, ...order.filter((n) => n !== name)]);
   }
 
-  // Depends only on `seriesConfig`, never on `clickOrder`/`effectiveAxisOrder`. This
-  // matters: ngx-echarts applies the `[options]` binding via `setOption(_, notMerge:
-  // true)` (a full replace) whenever it changes, which would reset every series'
-  // placeholder `data: []` back to empty — wiping out whatever `mergeOption` had
-  // streamed in. A legend click must instead flow through `mergeOption` (applied via
-  // a non-destructive merge), so the axis reorder doesn't blank the chart for a tick.
-  // yAxis offsets here just use the baseline (configured) order as their initial
-  // value — `mergeOption` supplies the authoritative, click-aware offset from the
-  // first render onward, the same way it supplies the first real `series[].data`.
+  // 系列を設定上の `yAxisIndex` 昇順に並べた名前の配列を返す。`option` と
+  // `effectiveAxisOrder` の両方から呼ばれる純粋関数(signalではない)。
+  // `computed()` にすると `option` が間接的に `clickOrder` に
+  // 依存する経路が生まれてしまうため(下記 `option` のコメントを参照)。
+  private baselineAxisOrder(configs: ChartSeriesData[]): string[] {
+    return [...configs].sort((a, b) => a.yAxisIndex - b.yAxisIndex).map((config) => config.name);
+  }
+
+  // グラフオプションの初期値を返す。
+  // `seriesConfig` にだけ依存し、`clickOrder`, `effectiveAxisOrder` には一切依存しない。
+  // 【重要】
+  // ngx-echarts は `[options]` バインディングが変わるたびに `setOption(_, notMerge: true)`(フル置換)を呼ぶため、
+  // もしここがクリック状態に依存していたら、`mergeOption` がストリーミングしてきたデータがクリックのたびに空へ巻き戻ってしまう。
+  // 凡例クリックによる並べ替えは代わりに `mergeOption` を経由させることで、チャートが一瞬空白になるのを防いでいる。
+  //
   protected option = computed(() => {
+    const location = `${this.className}.option`;
+    console.debug(`${location} recompute`);
+
     const configs = this.seriesConfig();
-    const baselineOrder = [...configs]
-      .sort((a, b) => a.yAxisIndex - b.yAxisIndex)
-      .map((config) => config.name);
+    const baselineOrder = this.baselineAxisOrder(configs);
 
     const yAxis = configs.map((config) => {
       const dictKeys = config.dict ? Object.keys(config.dict).map(Number) : undefined;
@@ -80,9 +93,7 @@ export class StreamingChartReverse {
           ? { formatter: (value: number) => config.dict?.[value] ?? String(value) }
           : {},
         splitLine: { show: false },
-        // Mirrors streaming-chart-ex's fix: the X-axis has no meaningful "value 0"
-        // position for these series to anchor to, so anchor the axis line to its own
-        // boundary instead of relying on the default onZero behavior.
+        // デフォルトの onZero に任せると軸線が描画範囲外へずれてしまうため false に設定。
         axisLine: { show: true, onZero: false },
         axisTick: { show: true },
       };
@@ -99,20 +110,9 @@ export class StreamingChartReverse {
     }));
 
     return {
-      legend: {
-        top: 10,
-        data: configs.map((config) => config.name),
-        // Initial value only — the legend is repurposed as an axis-reorder control
-        // rather than a show/hide toggle (see `onLegendSelectChanged`), and
-        // `mergeOption` is what actually reasserts "all selected" on every click to
-        // undo ECharts' default click-to-hide behavior (it's the binding that can
-        // react to a click without blanking the chart's streamed data; see the
-        // comment above this computed).
-        selected: Object.fromEntries(configs.map((config) => [config.name, true])),
-      },
       tooltip: {
         trigger: 'axis',
-        formatter: (params: any[]) => {
+        formatter: (params: TooltipParam[]) => {
           const lines = params.map(
             (param) => `${param.marker}${param.seriesName}: ${param.value[1]}`,
           );
@@ -121,7 +121,7 @@ export class StreamingChartReverse {
         },
         axisPointer: { animation: false },
       },
-      grid: { top: 50, left: 50 + configs.length * 60, right: 20, bottom: 80 },
+      grid: { top: 20, left: 50 + configs.length * 60, right: 20, bottom: 80 },
       xAxis: {
         type: 'value' as const,
         min: -WINDOW_SECONDS,
@@ -137,25 +137,23 @@ export class StreamingChartReverse {
     };
   });
 
-  // `seriesData` is expected to only grow (append-only) rather than drop its oldest
-  // point every tick. That keeps every existing point's array index — and therefore
-  // its identity to ECharts' diff/animation logic — stable forever, so an unchanged
-  // point is never mistaken for "moved to a different value" by the update animation.
-  // Since the X-axis window here is fixed at [-WINDOW_SECONDS, 0], the slide-left
-  // motion instead comes purely from remapping every point's X value to its age
-  // relative to "now" each tick: as "now" advances, every existing point's relative
-  // position shifts left by the same amount, which reads as the whole line panning
-  // left together. Points older than the window simply fall outside axis bounds and
-  // stop being drawn — they are never removed from the array, so this trades memory
-  // for animation smoothness, same as streaming-chart-ex.
+  // `seriesData` は増え続けるだけ(毎tick先頭の点を捨てたりしない)という前提。
+  // こうすることで各点の配列インデックス ── ひいては ECharts の
+  // diff/アニメーション処理から見た「その点の識別子」 ── が永久に安定し、
+  // 値の変わっていない点が「別の値に動いた」と誤認されて更新アニメーション
+  // が乱れることがない。X軸の表示範囲はここでは [-WINDOW_SECONDS, 0] に
+  // 固定されているため、左方向へ流れていくアニメーションは、毎tick「今」を
+  // 基準にした各点の相対位置(経過時間)を計算し直すことだけで生まれる:
+  // 「今」が進むにつれ、既存の全ての点の相対位置が同じ量だけ左へずれていき、
+  // それが「線全体が左へ一様にパンする」動きに見える。ウィンドウより古く
+  // なった点は単に軸の範囲外に出て描画されなくなるだけで、配列から削除は
+  // しない ── メモリと引き換えにアニメーションの滑らかさを取っている。
   //
-  // This also carries the click-driven axis reorder (`yAxis[].offset`) and the
-  // `legend.selected` reassertion (undoing ECharts' default click-to-hide behavior —
-  // see `onLegendSelectChanged`), rather than `option`, precisely because this is
-  // applied via a non-destructive merge: reordering here can't blank the chart's
-  // streamed data the way changing `option` would (see the comment on `option`).
+  // ここではさらに、クリックによる軸の並べ替え(`yAxis[].offset`)も一緒に
+  // 持たせている。`option` ではなくここに置いているのは、まさに非破壊的な
+  // マージで適用されるバインディングだからで、並べ替えが原因でストリーミング
+  // 中のデータが空白になることがない(`option` 側のコメントを参照)。
   protected mergeOption = computed(() => {
-    const configs = this.seriesConfig();
     const axisOrder = this.effectiveAxisOrder();
     const data = this.seriesData();
 
@@ -168,10 +166,7 @@ export class StreamingChartReverse {
     }
 
     return {
-      legend: {
-        selected: Object.fromEntries(configs.map((config) => [config.name, true])),
-      },
-      yAxis: configs.map((config) => ({ offset: axisOrder.indexOf(config.name) * 60 })),
+      yAxis: this.seriesConfig().map((config) => ({ offset: axisOrder.indexOf(config.name) * 60 })),
       series: data.map((points) => ({
         data: points.map((point): [number, number] => [
           nowTimestamp === undefined ? 0 : (point.timestamp - nowTimestamp) / 1000,

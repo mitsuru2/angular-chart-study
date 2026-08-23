@@ -5,9 +5,10 @@ import { ChartPointData, ChartSeriesData } from '../model/chart-data.interface';
 const INTERVAL_MS = 200;
 
 const STATUS_DICT: Record<number, string> = {
-  0: 'IDLE',
-  1: 'RUN',
-  2: 'ERROR',
+  0: 'OFF',
+  1: 'IDLE',
+  2: 'RUN',
+  3: 'ERROR',
 };
 
 @Component({
@@ -69,7 +70,7 @@ export class StreamingChartReverseDriver implements OnInit, OnDestroy {
 
   private nextStatus(timestamp: number): ChartPointData {
     if (Math.random() < 0.05) {
-      this.statusValue = Math.floor(Math.random() * 3);
+      this.statusValue = Math.floor(Math.random() * 4);
     }
     return { timestamp, value: this.statusValue };
   }

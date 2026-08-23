@@ -71,7 +71,7 @@ export class StreamingChartReverse {
         },
         axisPointer: { animation: false },
       },
-      grid: { top: 50, left: 50 + (maxYAxisIndex + 1) * 60, right: 20, bottom: 40 },
+      grid: { top: 50, left: 50 + (maxYAxisIndex + 1) * 60, right: 20, bottom: 80 },
       xAxis: {
         type: 'value' as const,
         min: -WINDOW_SECONDS,
@@ -81,6 +81,7 @@ export class StreamingChartReverse {
       },
       yAxis,
       series,
+      dataZoom: [{ type: 'slider' as const, xAxisIndex: 0, bottom: 10, height: 24 }],
       animationDurationUpdate: 200,
       animationEasingUpdate: 'linear' as const,
     };

@@ -3,13 +3,8 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
-import * as echarts from 'echarts/core';
-import { LineChart } from 'echarts/charts';
-import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components';
-import { SVGRenderer } from 'echarts/renderers';
 import { provideEchartsCore } from 'ngx-echarts';
-
-echarts.use([LineChart, GridComponent, LegendComponent, TooltipComponent, SVGRenderer]);
+import { echarts } from './echarts-setup';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,10 +12,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     providePrimeNG({
       theme: {
-        preset: Aura
+        preset: Aura,
       },
-      license: PRIMENG_LICENSE_KEY
+      license: PRIMENG_LICENSE_KEY,
     }),
-    provideEchartsCore({ echarts })
-  ]
+    provideEchartsCore({ echarts }),
+  ],
 };

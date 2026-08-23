@@ -2,6 +2,16 @@ import { Component, computed, input } from '@angular/core';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import { DataItemData, SeriesConfig } from './streaming-chart.interface';
 
+// tooltip の formatter に渡ってくる ECharts の params のうち、実際に使う
+// フィールドだけを最小限に型付けしたもの。
+interface TooltipParam {
+  name: string | number;
+  seriesIndex: number;
+  marker: string;
+  seriesName: string;
+  value: [string, number];
+}
+
 @Component({
   imports: [NgxEchartsDirective],
   selector: 'app-streaming-chart',
@@ -54,7 +64,7 @@ export class StreamingChart {
       },
       tooltip: {
         trigger: 'axis',
-        formatter: (params: any[]) => {
+        formatter: (params: TooltipParam[]) => {
           const date = new Date(params[0].name);
           const lines = params.map((param) => {
             const config = configs[param.seriesIndex];

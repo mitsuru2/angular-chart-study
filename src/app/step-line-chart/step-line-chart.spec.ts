@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideEchartsCore } from 'ngx-echarts';
+import { echarts } from '../echarts-setup';
 import { StepLineChart } from './step-line-chart';
 
 describe('StepLineChart', () => {
@@ -8,6 +10,7 @@ describe('StepLineChart', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [StepLineChart],
+      providers: [provideEchartsCore({ echarts })],
     }).compileComponents();
 
     fixture = TestBed.createComponent(StepLineChart);

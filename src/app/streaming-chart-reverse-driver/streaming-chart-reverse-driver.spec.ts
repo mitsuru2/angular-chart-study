@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideEchartsCore } from 'ngx-echarts';
 import { echarts } from '../echarts-setup';
-import { LineChart } from './line-chart';
+import { StreamingChartReverseDriver } from './streaming-chart-reverse-driver';
 
-describe('LineChart', () => {
-  let component: LineChart;
-  let fixture: ComponentFixture<LineChart>;
+describe('StreamingChartReverseDriver', () => {
+  let component: StreamingChartReverseDriver;
+  let fixture: ComponentFixture<StreamingChartReverseDriver>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LineChart],
+      imports: [StreamingChartReverseDriver],
       providers: [provideEchartsCore({ echarts })],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(LineChart);
+    fixture = TestBed.createComponent(StreamingChartReverseDriver);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

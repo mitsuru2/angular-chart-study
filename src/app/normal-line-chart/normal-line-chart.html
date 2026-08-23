@@ -1,0 +1,10 @@
+<h3>Normal Line Chart</h3>
+<div class="legend">
+  @for (config of seriesConfig(); track config.name) {
+    <button type="button" class="legend-item" (click)="onLegendItemClick(config.name)">
+      <svg data-p-icon="circle-fill" [color]="config.color" [size]="14" />
+      <span class="legend-label">&nbsp;{{ config.name }}</span>
+    </button>
+  }
+</div>
+<div echarts [options]="option()" [merge]="mergeOption()" class="demo-chart"></div>

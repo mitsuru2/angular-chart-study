@@ -6,10 +6,10 @@ import {
   StreamingChartExSeriesData,
 } from './streaming-chart-ex.interface';
 
-// Number of most-recent points kept visible through the X-axis window. `seriesData`
-// itself is expected to only ever grow (points appended, never dropped from the
-// front) — see the class doc comment on `mergeOption` for why.
-const VISIBLE_POINT_COUNT = 200;
+// Width of the X-axis window when not zoomed, in milliseconds. `seriesData` itself
+// is expected to only ever grow (points appended, never dropped from the front) —
+// see the class doc comment on `mergeOption` for why.
+const VISIBLE_WINDOW_MS = 60_000;
 
 @Component({
   imports: [NgxEchartsDirective],
@@ -95,18 +95,25 @@ export class StreamingChartEx {
   // point is genuinely new.
   protected mergeOption = computed(() => {
     const data = this.seriesData();
-    let windowMin: number | undefined;
-    let windowMax: number | undefined;
+    let latestTimestamp: number | undefined;
     for (const points of data) {
-      const windowStart = points[Math.max(0, points.length - VISIBLE_POINT_COUNT)];
       const last = points[points.length - 1];
-      if (windowStart && (windowMin === undefined || windowStart.timestamp < windowMin)) {
-        windowMin = windowStart.timestamp;
-      }
-      if (last && (windowMax === undefined || last.timestamp > windowMax)) {
-        windowMax = last.timestamp;
+      if (last && (latestTimestamp === undefined || last.timestamp > latestTimestamp)) {
+        latestTimestamp = last.timestamp;
       }
     }
+    const startTimestamp = this.startTimestamp();
+    // The axis itself is always exactly VISIBLE_WINDOW_MS wide — never narrower,
+    // even while less data than that exists. Until the data actually reaches the
+    // window's initial right edge (startTimestamp + VISIBLE_WINDOW_MS), that edge
+    // stays put and the line simply grows into the fixed window from the left; only
+    // once data passes it does the window start advancing (both edges together) to
+    // keep following the latest point.
+    const windowMax =
+      latestTimestamp !== undefined && startTimestamp !== undefined
+        ? Math.max(latestTimestamp, startTimestamp + VISIBLE_WINDOW_MS)
+        : undefined;
+    const windowMin = windowMax !== undefined ? windowMax - VISIBLE_WINDOW_MS : undefined;
     return {
       xAxis: { min: windowMin, max: windowMax },
       series: data.map((points) => ({

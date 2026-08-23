@@ -1,4 +1,7 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 import { StreamingChartEx } from '../streaming-chart-ex/streaming-chart-ex';
 import {
   StreamingChartExGraphOptionData,
@@ -9,7 +12,7 @@ import {
 const INTERVAL_MS = 200;
 
 @Component({
-  imports: [StreamingChartEx],
+  imports: [StreamingChartEx, ToggleSwitch, ReactiveFormsModule],
   selector: 'app-streaming-chart-ex-driver',
   styleUrl: './streaming-chart-ex-driver.scss',
   templateUrl: './streaming-chart-ex-driver.html',
@@ -25,18 +28,17 @@ export class StreamingChartExDriver implements OnInit, OnDestroy {
     { name: 'Sensor B', color: 'rgba(220,90,60,0.8)', range: { min: -50, max: 50 }, index: 1 },
     { name: 'Sensor A', color: 'rgba(75,120,220,0.8)', range: { min: 0, max: 100 }, index: 0 },
   ];
-  protected seriesData = signal<StreamingChartExPointData[][]>([]);
-  protected graphOption: StreamingChartExGraphOptionData = { showElapsedTime: true };
+  protected seriesData = signal<StreamingChartExPointData[][]>([[], []]);
+
+  protected showElapsedTimeControl = new FormControl(true, { nonNullable: true });
+  private showElapsedTime = toSignal(this.showElapsedTimeControl.valueChanges, {
+    initialValue: this.showElapsedTimeControl.value,
+  });
+  protected graphOption = computed<StreamingChartExGraphOptionData>(() => ({
+    showElapsedTime: this.showElapsedTime(),
+  }));
 
   ngOnInit() {
-    const initialB: StreamingChartExPointData[] = [];
-    const initialA: StreamingChartExPointData[] = [];
-    for (let i = 0; i < 200; i++) {
-      const timestamp = this.advanceTime();
-      initialB.push(this.nextB(timestamp));
-      initialA.push(this.nextA(timestamp));
-    }
-    this.seriesData.set([initialB, initialA]);
     this.intervalId = setInterval(() => {
       const timestamp = this.advanceTime();
       const nextB = this.nextB(timestamp);

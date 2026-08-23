@@ -1,7 +1,5 @@
-<label>
-  <p-toggleswitch [formControl]="showExtraSeriesControl" />
-  Show extra series
-</label>
+<label for="show-extra-series">Show extra series</label>
+<p-toggleswitch inputId="show-extra-series" [formControl]="showExtraSeriesControl" />
 
 <app-streaming-chart-reverse
   [seriesConfig]="visibleSeriesConfig()"

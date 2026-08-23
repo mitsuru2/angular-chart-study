@@ -11,6 +11,14 @@ import {
 // see the class doc comment on `mergeOption` for why.
 const VISIBLE_WINDOW_MS = 60_000;
 
+// tooltip の formatter に渡ってくる ECharts の params のうち、実際に使う
+// フィールドだけを最小限に型付けしたもの。
+interface TooltipParam {
+  marker: string;
+  seriesName: string;
+  value: [number, number];
+}
+
 @Component({
   imports: [NgxEchartsDirective],
   selector: 'app-streaming-chart-ex',
@@ -59,7 +67,7 @@ export class StreamingChartEx {
       legend: { top: 10, data: configs.map((config) => config.name) },
       tooltip: {
         trigger: 'axis',
-        formatter: (params: any[]) => {
+        formatter: (params: TooltipParam[]) => {
           const lines = params.map(
             (param) => `${param.marker}${param.seriesName}: ${param.value[1]}`,
           );

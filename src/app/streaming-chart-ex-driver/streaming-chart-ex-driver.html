@@ -1,7 +1,5 @@
-<label>
-  <p-toggleswitch [formControl]="showElapsedTimeControl" />
-  Show elapsed time
-</label>
+<label for="show-elapsed-time">Show elapsed time</label>
+<p-toggleswitch inputId="show-elapsed-time" [formControl]="showElapsedTimeControl" />
 
 <app-streaming-chart-ex
   [seriesConfig]="seriesConfig"

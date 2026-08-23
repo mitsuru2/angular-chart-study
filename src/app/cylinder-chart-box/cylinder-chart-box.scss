@@ -1,3 +1,8 @@
+// p-card の border はデザイントークン化されておらず通常の詳細度では上書きできないため !important で上書きする。
+.p-card {
+  border: 1px solid silver !important;
+}
+
 .param-grid {
   display: grid;
   grid-template-columns: 60% 40%;
@@ -10,8 +15,13 @@
 }
 
 .param-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   grid-column: 1;
   grid-row: 2;
+  font-weight: bold;
+  font-size: large;
 }
 
 .chart-cell {

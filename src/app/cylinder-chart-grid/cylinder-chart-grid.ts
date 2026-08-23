@@ -18,9 +18,9 @@ const STATUS_DICT: Record<number, string> = {
 export class CylinderChartGrid implements OnInit, OnDestroy {
   // SingleBarChart は単一系列専用のため yAxisIndex は使用しない。
   protected physicalSeriesConfig: ChartSeriesData = {
-    name: 'Level',
+    name: 'RPM',
     color: 'rgba(75,120,220,0.8)',
-    range: { min: 0, max: 100 },
+    range: { min: 0, max: 20000 },
     yAxisIndex: 0,
   };
   protected discreteSeriesConfig: ChartSeriesData = {
@@ -30,23 +30,28 @@ export class CylinderChartGrid implements OnInit, OnDestroy {
     yAxisIndex: 0,
   };
 
-  protected physicalData = signal<ChartPointData>({ value: 50, timestamp: Date.now() });
+  protected physicalData = signal<ChartPointData>({ value: 10000, timestamp: Date.now() });
   protected discreteData = signal<ChartPointData>({ value: 0, timestamp: Date.now() });
 
   private intervalId?: ReturnType<typeof setInterval>;
 
+  private counter = 0;
+
   ngOnInit(): void {
     this.intervalId = setInterval(() => {
+      this.counter++;
       const now = Date.now();
       this.physicalData.update(({ value }) => ({
-        value: Math.min(100, Math.max(0, value + (Math.random() * 2 - 1) * 15)),
+        value: Math.round(Math.min(20000, Math.max(0, value + (Math.random() * 2 - 1) * 1000))),
         timestamp: now,
       }));
-      this.discreteData.set({
-        value: Math.floor(Math.random() * 4),
-        timestamp: now,
-      });
-    }, 1000);
+      if (this.counter % 5 === 0) {
+        this.discreteData.set({
+          value: Math.floor(Math.random() * 4),
+          timestamp: now,
+        });
+      }
+    }, 200);
   }
 
   ngOnDestroy(): void {

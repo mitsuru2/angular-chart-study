@@ -6,6 +6,12 @@ import { StreamingChartReverse } from '../streaming-chart-reverse/streaming-char
 import { ChartPointData, ChartSeriesData } from '../model/chart-data.interface';
 
 const INTERVAL_MS = 200;
+// StreamingChartReverse の表示ウィンドウ(60秒)より少し長め。id ベースの差分
+// アニメーション(streaming-chart-reverse.ts の mergeOption 参照)のおかげで、
+// 表示範囲外になった古い点を間引いても残りの点が波打つことはない。ぴったり
+// 60秒ではなく余裕を持たせているのは、境界上の点がタイミング差でちらつくのを
+// 避けるため。
+const RETENTION_MS = 65_000;
 
 const STATUS_DICT: Record<number, string> = {
   0: 'OFF',
@@ -72,13 +78,11 @@ export class StreamingChartReverseDriver implements OnInit, OnDestroy {
       const nextSensor = this.nextSensor(timestamp);
       const nextStatus = this.nextStatus(timestamp);
       const nextExtra = this.nextExtra(timestamp);
-      // Append-only: StreamingChartReverse relies on each point's array index staying
-      // stable forever so its update animation reads as a rigid slide rather than
-      // per-point value tweening.
+      const cutoff = timestamp - RETENTION_MS;
       this.seriesData.update((current) => [
-        [...current[0], nextSensor],
-        [...current[1], nextStatus],
-        [...current[2], nextExtra],
+        [...current[0], nextSensor].filter((point) => point.timestamp >= cutoff),
+        [...current[1], nextStatus].filter((point) => point.timestamp >= cutoff),
+        [...current[2], nextExtra].filter((point) => point.timestamp >= cutoff),
       ]);
     }, INTERVAL_MS);
   }

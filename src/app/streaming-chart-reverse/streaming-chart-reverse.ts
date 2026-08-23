@@ -4,10 +4,11 @@ import { CircleFill } from '@primeicons/angular/circle-fill';
 import { ChartPointData, ChartSeriesData } from '../model/chart-data.interface';
 
 // X軸は常にこの秒数ぶんの幅で、[-WINDOW_SECONDS, 0](0 = 現在、右端)に固定される。
-// - データがこの秒数ぶん溜まっていなくても伸び縮みしない。
-// - `seriesData` は常に増え続けるだけ(先頭の点が削除されることはない)
-//   --> mergeOption のコメントも参照。
+// データがこの秒数ぶん溜まっていなくても伸び縮みしない。
 const WINDOW_SECONDS = 60;
+
+// Y軸を1つ左にスタックするごとに加算するオフセット(px)。
+const Y_AXIS_OFFSET_STEP = 60;
 
 // tooltip の formatter に渡ってくる ECharts の params のうち、実際に使う
 // フィールドだけを最小限に型付けしたもの。
@@ -83,7 +84,7 @@ export class StreamingChartReverse {
       return {
         type: 'value' as const,
         position: 'left' as const,
-        offset: baselineOrder.indexOf(config.name) * 60,
+        offset: baselineOrder.indexOf(config.name) * Y_AXIS_OFFSET_STEP,
         ...(isDiscrete
           ? { min: Math.min(...dictKeys!), max: Math.max(...dictKeys!), interval: 1 }
           : config.range
@@ -121,7 +122,7 @@ export class StreamingChartReverse {
         },
         axisPointer: { animation: false },
       },
-      grid: { top: 20, left: 50 + configs.length * 60, right: 20, bottom: 80 },
+      grid: { top: 20, left: 50 + configs.length * Y_AXIS_OFFSET_STEP, right: 20, bottom: 80 },
       xAxis: {
         type: 'value' as const,
         min: -WINDOW_SECONDS,
@@ -137,22 +138,29 @@ export class StreamingChartReverse {
     };
   });
 
-  // `seriesData` は増え続けるだけ(毎tick先頭の点を捨てたりしない)という前提。
-  // こうすることで各点の配列インデックス ── ひいては ECharts の
-  // diff/アニメーション処理から見た「その点の識別子」 ── が永久に安定し、
-  // 値の変わっていない点が「別の値に動いた」と誤認されて更新アニメーション
-  // が乱れることがない。X軸の表示範囲はここでは [-WINDOW_SECONDS, 0] に
-  // 固定されているため、左方向へ流れていくアニメーションは、毎tick「今」を
-  // 基準にした各点の相対位置(経過時間)を計算し直すことだけで生まれる:
-  // 「今」が進むにつれ、既存の全ての点の相対位置が同じ量だけ左へずれていき、
-  // それが「線全体が左へ一様にパンする」動きに見える。ウィンドウより古く
-  // なった点は単に軸の範囲外に出て描画されなくなるだけで、配列から削除は
-  // しない ── メモリと引き換えにアニメーションの滑らかさを取っている。
+  // 【差分アニメーション】
+  // 各データ点には `id: point.timestamp` を付けて ECharts に渡している。
+  // これがない場合、ECharts は更新時に配列のインデックスで新旧の点を対応付けるため、
+  // driver側で古い点を間引くと残りの点が「別の値に動いた」と誤認されて波打つようなアニメーションになってしまっていた。
+  // タイムスタンプを一意のIDとして使用することで安定したアニメーションを実現している。
   //
-  // ここではさらに、クリックによる軸の並べ替え(`yAxis[].offset`)も一緒に
-  // 持たせている。`option` ではなくここに置いているのは、まさに非破壊的な
-  // マージで適用されるバインディングだからで、並べ替えが原因でストリーミング
-  // 中のデータが空白になることがない(`option` 側のコメントを参照)。
+  // X軸の表示範囲はここでは [-WINDOW_SECONDS, 0] に固定されているため、
+  // データ更新のたびに全データの X座標を「現在時刻からの経過時間」で再計算している。
+  // これにより、既存の全ての点の相対位置が同じ量だけ左へずれていき、
+  // それが「線全体が左へ一様にパンする」アニメーションとなる。
+  //
+  // 【Y軸の並び替え】
+  // `yAxis[]` の各要素に新しい `offset` だけを差分として与えている。ECharts は
+  // 配列をインデックスでマージするため、ここでの `.map()` は `axisOrder`
+  // (クリックによる並べ替え後の順序)ではなく、あえて `option` 側の `yAxis`
+  // 配列と同じ並び順である `seriesConfig()` をそのまま反復している ── つまり
+  // 「どの `yAxis` オブジェクトに適用するか」は元の設定順(配列インデックス)、
+  // 「そのoffsetの値」はクリックによる並べ替え結果(`axisOrder` の中でその
+  // 系列が何番目に来るか = `axisOrder.indexOf(config.name)`)という、2つの
+  // 異なる順序を組み合わせている。ここを誤って `axisOrder` を反復してしまうと
+  // `option` 側の `yAxis[i]` とインデックスがずれ、別の軸に `offset` が
+  // 適用されてしまうので注意。
+  //
   protected mergeOption = computed(() => {
     const axisOrder = this.effectiveAxisOrder();
     const data = this.seriesData();
@@ -166,12 +174,17 @@ export class StreamingChartReverse {
     }
 
     return {
-      yAxis: this.seriesConfig().map((config) => ({ offset: axisOrder.indexOf(config.name) * 60 })),
+      yAxis: this.seriesConfig().map((config) => ({
+        offset: axisOrder.indexOf(config.name) * Y_AXIS_OFFSET_STEP,
+      })),
       series: data.map((points) => ({
-        data: points.map((point): [number, number] => [
-          nowTimestamp === undefined ? 0 : (point.timestamp - nowTimestamp) / 1000,
-          point.value,
-        ]),
+        data: points.map((point) => ({
+          value: [
+            nowTimestamp === undefined ? 0 : (point.timestamp - nowTimestamp) / 1000,
+            point.value,
+          ] as [number, number],
+          id: point.timestamp,
+        })),
       })),
     };
   });

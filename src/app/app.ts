@@ -21,5 +21,6 @@ export class App {
     { label: 'Smooth Line Chart', id: 'smooth-line-chart' },
     { label: 'Streaming Chart', id: 'streaming-chart' },
     { label: 'Streaming Chart Ex', id: 'streaming-chart-ex' },
+    { label: 'Streaming Chart Reverse', id: 'streaming-chart-reverse' },
   ];
 }

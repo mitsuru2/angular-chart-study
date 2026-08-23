@@ -32,4 +32,11 @@ export const routes: Routes = [
         (m) => m.StreamingChartExDriver,
       ),
   },
+  {
+    path: 'streaming-chart-reverse',
+    loadComponent: () =>
+      import('./streaming-chart-reverse-driver/streaming-chart-reverse-driver').then(
+        (m) => m.StreamingChartReverseDriver,
+      ),
+  },
 ];

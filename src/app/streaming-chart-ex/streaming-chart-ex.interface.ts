@@ -1,11 +1,8 @@
+import { RangeData } from '../model/chart-data.interface';
+
 export interface StreamingChartExPointData {
   value: number;
   timestamp: number;
-}
-
-export interface RangeData {
-  min?: number;
-  max?: number;
 }
 
 export interface StreamingChartExSeriesData {

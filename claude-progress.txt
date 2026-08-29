@@ -1,4 +1,0 @@
-# Claude Progress Log
-#
-# Append one dated entry per Claude Code session summarizing what was done,
-# decisions made, and any unresolved issues. Newest entries at the bottom.

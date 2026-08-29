@@ -1,10 +1,10 @@
 {
   "features": [
     {
-      "name": "example-feature",
-      "status": "todo",
-      "description": "Replace this entry with a real feature. status must be one of: todo, in_progress, done.",
-      "updatedAt": null
+      "name": "bar-chart",
+      "status": "done",
+      "description": "GitHub Issue #6: 複数パラメータの現在値を表示する棒グラフ(bar-chart)コンポーネントと、ダミーデータを生成する bar-chart-driver コンポーネント。Y軸は左側に1本のみ、固定/自動の2レンジモード対応、サイズは呼び出し側の style width/height で指定。",
+      "updatedAt": "2026-08-29"
     }
   ]
 }

@@ -1,0 +1,10 @@
+// 表示サイズは呼び出し側がホスト要素に style で width/height(および
+// max-width/min-width 等)を指定することで決まる。
+:host {
+  display: block;
+}
+
+.bar-chart {
+  width: 100%;
+  height: 100%;
+}

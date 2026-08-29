@@ -1,0 +1,16 @@
+.chart {
+  height: 320px;
+}
+
+// レスポンシブなサイズ調整(width / max-width / min-width)の確認用。
+.fixed-range {
+  width: 60%;
+  max-width: 600px;
+  min-width: 280px;
+}
+
+.auto-range {
+  width: 100%;
+  max-width: 800px;
+  min-width: 280px;
+}

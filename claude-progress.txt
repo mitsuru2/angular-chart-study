@@ -2,3 +2,26 @@
 #
 # Append one dated entry per Claude Code session summarizing what was done,
 # decisions made, and any unresolved issues. Newest entries at the bottom.
+
+## 2026-08-29 - GitHub Issue #6: 棒グラフの作成
+
+- `bar-chart`(表示専用)と `bar-chart-driver`(ダミーデータ生成)コンポーネントを新規作成。
+  - `bar-chart` は複数パラメータ(`BarChartParam[]` + `ChartPointData[]`)を1つの棒グラフとして描画。
+    Y軸は1本のみ(左側固定)で、`yAxisRange` を指定すると固定レンジ、未指定ならECharts標準の
+    自動レンジになる。モードの動的切り替えは非サポート(要件通り)。
+  - グラフの表示サイズは呼び出し側がホスト要素に CSS の width/height(および
+    max-width/min-width)を指定する方式(`:host { display: block }` + 内部 div を 100%/100%)。
+    既存の single-bar-chart / cylinder-chart-box が採用しているピクセル数値の `width`/`height`
+    input とは異なる方式を意図的に採用(Issue #6 の要求に合わせた)。ngx-echarts の
+    `autoResize`(デフォルト true, ResizeObserver ベース)でサイズ追従することを確認済み。
+  - `bar-chart-driver` は「静的データ + 固定レンジ」と「setInterval で動的に変化する値 + 自動レンジ」
+    の2チャートを並べて表示し、Issue の受け入れ条件(静的描画・動的描画・アニメーション・
+    レスポンシブサイズ・Y軸位置・レンジ2モード)をすべて1画面でデモできるようにした。
+  - `model/chart-data.interface.ts` に `BarChartParam`(name + color のみ、yAxisIndex なし)を追加。
+    既存の `ChartSeriesData` は系列ごとに Y 軸を持つ前提のため、単一共有 Y 軸の bar-chart には
+    転用せず新規インターフェースにした。
+  - ルーティング(`app.routes.ts`)とナビゲーション(`app.ts`)に `bar-chart` パスを追加。
+- 動作確認: `npm run build` / `npm test`(18 tests green)に加え、Playwright で dev server 上の
+  `/bar-chart` をスクリーンショット・aria-label・レスポンシブ幅(ビューポート 500px で
+  min-width 280px が効くこと)を目視確認済み。コンソールエラーなし。
+- 未解決事項なし。ブランチ `feature/6-bar-chart` で PR 作成予定。

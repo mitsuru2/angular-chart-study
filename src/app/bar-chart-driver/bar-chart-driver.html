@@ -1,0 +1,16 @@
+<h3>Bar Chart</h3>
+
+<section>
+  <h4>Static / Fixed Y-Axis Range</h4>
+  <app-bar-chart
+    class="chart fixed-range"
+    [params]="params"
+    [data]="staticData"
+    [yAxisRange]="fixedRange"
+  />
+</section>
+
+<section>
+  <h4>Dynamic / Auto Y-Axis Range</h4>
+  <app-bar-chart class="chart auto-range" [params]="params" [data]="dynamicData()" />
+</section>

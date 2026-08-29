@@ -24,5 +24,6 @@ export class App {
     { label: 'Streaming Chart Reverse', id: 'streaming-chart-reverse' },
     { label: 'Normal Line Chart', id: 'normal-line-chart' },
     { label: 'Cylinder Chart Grid', id: 'cylinder-chart-grid' },
+    { label: 'Bar Chart', id: 'bar-chart' },
   ];
 }

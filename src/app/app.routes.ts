@@ -49,4 +49,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./cylinder-chart-grid/cylinder-chart-grid').then((m) => m.CylinderChartGrid),
   },
+  {
+    path: 'bar-chart',
+    loadComponent: () =>
+      import('./bar-chart-driver/bar-chart-driver').then((m) => m.BarChartDriver),
+  },
 ];

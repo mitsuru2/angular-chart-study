@@ -4,7 +4,7 @@
   "cli": {
     "packageManager": "npm",
     "analytics": false,
-    "schematicCollections": ["angular-eslint"]
+    "schematicCollections": ["angular-eslint", "playwright-ng-schematics"]
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -34,6 +34,9 @@
             "styles": ["src/styles.scss"],
             "security": {
               "allowedHosts": ["localhost"]
+            },
+            "define": {
+              "PRIMENG_LICENSE_KEY": "''"
             }
           },
           "configurations": {
@@ -87,6 +90,17 @@
           "builder": "@angular-eslint/builder:lint",
           "options": {
             "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+          }
+        },
+        "e2e": {
+          "builder": "playwright-ng-schematics:playwright",
+          "options": {
+            "devServerTarget": "angular-chart-study:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "angular-chart-study:serve:production"
+            }
           }
         }
       }

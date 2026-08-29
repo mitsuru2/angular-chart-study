@@ -45,3 +45,10 @@ Thumbs.db
 
 # Local configuration files
 .devcontainer/secrets.env
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/

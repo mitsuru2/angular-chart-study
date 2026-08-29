@@ -12,6 +12,10 @@
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},
 
+  // NET_ADMIN/NET_RAW are required by scripts/init-firewall.sh (iptables/ipset) to
+  // restrict outbound network access to an allowlist for Claude Code sessions.
+  "runArgs": ["--cap-add=NET_ADMIN", "--cap-add=NET_RAW"],
+
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
 

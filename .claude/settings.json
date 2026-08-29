@@ -1,8 +1,13 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(npx tsc *)",
-      "Bash(npx ng *)"
+    "defaultMode": "bypassPermissions",
+    "allow": ["Edit(src/**)"],
+    "deny": [
+      "Edit(.claude/settings.json)",
+      "Edit(.angular/**)",
+      "Edit(.git/**)",
+      "Edit(node_modules/**)",
+      "Edit(package-lock.json)"
     ]
   }
 }

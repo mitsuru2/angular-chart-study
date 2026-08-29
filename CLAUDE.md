@@ -56,3 +56,23 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use the `providedIn: 'root'` option for singleton services
 - Prefer the `@Service` decorator over `@Injectable({providedIn: 'root'})` for new singleton services (Angular v22+)
 - Use the `inject()` function instead of constructor injection
+
+## Session Start Procedure
+
+Before starting any work, run `bash init.sh` from the repo root. It scaffolds required files, verifies the test/build commands, restricts outbound network access to an allowlist, and confirms git/gh credentials and GitHub Issues access.
+
+Then always read the following files to understand prior progress and outstanding tasks.
+
+- `claude-progress.txt` — log of past work and handoff notes
+- `feature-list.json` — implementation status of each feature
+
+Use this context to decide what to work on in the current session.
+
+## Session End Procedure
+
+When finishing work, complete the following steps **in this order**.
+
+1. Run `npm test` and confirm all tests pass. If any fail, fix the cause before proceeding.
+2. Append a summary of this session's work, changes, and any unresolved issues to `claude-progress.txt`.
+3. Update `feature-list.json` so the `status` of each feature implemented or changed in this session reflects reality.
+4. `git commit` the above changes (code, `claude-progress.txt`, and `feature-list.json`). Write a concise commit message describing the change.

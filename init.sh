@@ -9,9 +9,11 @@
 #   3. Lock down outbound network access to an allowlist (github.com, anthropic.com).
 #   4. Verify git/gh are usable and the user's credentials are valid.
 #   5. Verify access to this repo's GitHub Issues.
+#   6. Verify Google Drive credentials for the test-evidence upload workflow
+#      (optional — warns and skips if not yet configured).
 #
 # Steps 1-2 run before the network is locked down (step 3) since they don't
-# need network access; steps 4-5 run after, both to confirm the allowlist
+# need network access; steps 4-6 run after, both to confirm the allowlist
 # is actually sufficient and that credentials work under it.
 
 set -euo pipefail
@@ -25,6 +27,7 @@ steps=(
   "scripts/init-firewall.sh"
   "scripts/init-verify-git-auth.sh"
   "scripts/init-verify-github-issues.sh"
+  "scripts/init-verify-gdrive.sh"
 )
 
 for step in "${steps[@]}"; do

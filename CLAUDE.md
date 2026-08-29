@@ -59,7 +59,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## Session Start Procedure
 
-Before starting any work, run `bash init.sh` from the repo root. It scaffolds required files, verifies the test/build commands, restricts outbound network access to an allowlist, and confirms git/gh credentials and GitHub Issues access.
+Before starting any work, run `bash init.sh` from the repo root. It scaffolds required files, verifies the test/build commands, restricts outbound network access to an allowlist, confirms git/gh credentials and GitHub Issues access, and checks Google Drive credentials used for attaching test evidence to GitHub Issues (see Session End Procedure below).
 
 Then always read the following files to understand prior progress and outstanding tasks.
 
@@ -73,6 +73,10 @@ Use this context to decide what to work on in the current session.
 When finishing work, complete the following steps **in this order**.
 
 1. Run `npm test` and confirm all tests pass. If any fail, fix the cause before proceeding.
-2. Append a summary of this session's work, changes, and any unresolved issues to `claude-progress.txt`.
-3. Update `feature-list.json` so the `status` of each feature implemented or changed in this session reflects reality.
-4. `git commit` the above changes (code, `claude-progress.txt`, and `feature-list.json`). Write a concise commit message describing the change.
+2. If this session's work was requested via a specific GitHub Issue (the user referenced an issue number/URL, or the task began by reading one with `gh issue view`), attach test evidence to that issue:
+   1. For each distinct test case that validates the fix, create a scratch folder (e.g. under `/tmp`) named `tc1`, `tc2`, ... containing a `title.txt` (first line = short title) plus evidence appropriate to the change — PNG screenshots (e.g. via Playwright) for GUI/component changes, or a plain-text file of input/output patterns for calculation/logic changes.
+   2. Run `scripts/attach-issue-evidence.sh <issue-number> <tc1-dir> <tc2-dir> ...` to zip each folder, upload the zips to Google Drive, and post a single summary comment on the issue listing each test case's title with a link to its zip.
+   3. Skip this step entirely for work that does not originate from a GitHub Issue.
+3. Append a summary of this session's work, changes, and any unresolved issues to `claude-progress.txt`.
+4. Update `feature-list.json` so the `status` of each feature implemented or changed in this session reflects reality.
+5. `git commit` the above changes (code, `claude-progress.txt`, and `feature-list.json`). Write a concise commit message describing the change.

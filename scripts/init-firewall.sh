@@ -34,6 +34,8 @@ ALLOWED_SUBDOMAINS=(
   "raw.githubusercontent.com"
   "api.anthropic.com"
   "console.anthropic.com"
+  "oauth2.googleapis.com"
+  "www.googleapis.com"
 )
 
 echo "=== init-firewall: resetting firewall state ==="

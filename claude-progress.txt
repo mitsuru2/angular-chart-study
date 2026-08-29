@@ -25,3 +25,31 @@
   `/bar-chart` をスクリーンショット・aria-label・レスポンシブ幅(ビューポート 500px で
   min-width 280px が効くこと)を目視確認済み。コンソールエラーなし。
 - 未解決事項なし。ブランチ `feature/6-bar-chart` で PR 作成予定。
+
+## 2026-08-29 - GitHub Issue対応時のテストエビデンス添付フロー整備
+
+- GitHub Issueに基づく修正作業を完了した際、テストケースごとのエビデンス(スクリーンショット/
+  入出力パターン)をzip化してGoogle Drive経由でIssueに紐づける運用を追加。GitHub Issuesの公式
+  API/`gh` CLIには任意ファイルをIssueへ直接添付する公開エンドポイントが存在しない(Web UIの
+  ドラッグ&ドロップは非公開の内部API)ため、本人のGoogle Driveにアップロードし共有リンクを
+  Issueコメントに記載する方式を採用(ユーザー確認済み)。
+- `scripts/init-firewall.sh`: allowlistに `oauth2.googleapis.com` / `www.googleapis.com` を追加。
+- `scripts/init-verify-gdrive.sh`(新規): `GDRIVE_CLIENT_ID` / `GDRIVE_CLIENT_SECRET` /
+  `GDRIVE_REFRESH_TOKEN` / `GDRIVE_FOLDER_ID` の疎通確認。未設定時は警告してexit 0でスキップし、
+  他の検証ステップをブロックしない。`init.sh` のstep配列に追加。
+- `scripts/attach-issue-evidence.sh`(新規): `tc1`, `tc2`... という名前のフォルダ(各々
+  `title.txt` + エビデンス本体)を受け取り、zip化 → Google Driveへアップロード → 各ファイルを
+  リンク共有可能に設定 → 全テストケースのタイトル+リンクをまとめた1コメントを
+  `gh issue comment` で投稿、までを行う。依存は curl/jq/zip/gh のみ。
+- `CLAUDE.md`: Session End ProcedureにGitHub Issue起点の作業のみ適用される条件付きステップを
+  追加(step 2)。Issueを参照しない作業では発動しない。Session Start Procedureの説明文も
+  init.shの新ステップに合わせて更新。
+- 動作確認: 新規/変更した4スクリプトを `bash -n` で構文チェック。`init-verify-gdrive.sh` は
+  GDRIVE_*未設定の状態で実行し、警告メッセージとexit 0を確認。`attach-issue-evidence.sh` は
+  引数なし/`title.txt`欠如/存在しないディレクトリの各異常系がエラー終了することを確認。
+  `npm test`(18 tests green)。
+- 未解決事項: Google Drive側の実際のOAuthクレデンシャル(GDRIVE_CLIENT_ID等)はユーザーが
+  一度だけ手動でセットアップし `.devcontainer/secrets.env` に追加する必要があり、今回のセッション
+  では未設定・未実施(手順は `scripts/attach-issue-evidence.sh` のヘッダーコメントに記載)。
+  実際のGoogle Driveアップロード〜Issueコメント投稿のエンドツーエンド確認は、その設定完了後に
+  別途実施が必要。

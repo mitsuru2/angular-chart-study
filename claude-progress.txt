@@ -161,3 +161,29 @@
 - PR #11 の本文に `Closes #10` を追記してIssue #10と正式に紐付け、検証結果のエビデンス
   (ラベル→type判定、ブランチ再開パス、PR再利用判定の入出力ログ)をIssue #10にコメント添付した。
 - 未解決事項なし。
+
+## 2026-08-30 - ファイアウォール: Google APIのIP許可をDNS解決ピン留めから公開IPレンジ方式に変更
+
+- 前段のIssue #10動作確認作業中、`scripts/attach-issue-evidence.sh` がセッション後半で
+  `oauth2.googleapis.com` への接続時に突然タイムアウトする事象が発生。調査の結果、
+  `scripts/init-firewall.sh` が `oauth2.googleapis.com` / `www.googleapis.com` を
+  init時点でDNS解決した単一IPのみをファイアウォール許可リスト(ipset)にピン留めしていたことが
+  原因と判明。これらのホストはGoogleのフロントエンドプール配下にあり、短いDNS TTL(`dig`で
+  実測 約4〜5分)で異なるIPに切り替わるため、セッションがそれより長く続くと許可リストが
+  古くなり、以降のリクエストがファイアウォールに無言でドロップされていた。
+- 修正: `scripts/init-firewall.sh` に、GitHubの公開IPレンジ(`api.github.com/meta`)と同様の
+  方式で、Googleが公式に公開しているフロントエンドIPレンジ(`https://www.gstatic.com/ipranges/goog.json`)
+  を取得しallowed-domains ipsetへ追加する処理を追加。これにより、DNS解決がどのIPを返しても
+  レンジに包含されるため、TTL切れによる許可漏れが恒久的に解消される。
+- 動作確認:
+  - `bash scripts/init-firewall.sh` を再実行し、GitHub/Googleのレンジ取得を含め最初から最後まで
+    エラーなく完走(`github.com`到達可能・`example.com`遮断、を維持したまま)することを確認。
+  - `ipset test allowed-domains <その時点のoauth2.googleapis.comの解決IP>` で、goog.jsonの
+    レンジによりカバーされていることを確認(実際にIPが前回と異なる値へローテートしていたことも
+    合わせて確認)。
+  - `curl https://oauth2.googleapis.com/token` と `curl https://www.googleapis.com/drive/v3/about`
+    が接続タイムアウトではなく期待通りの認証エラー(400/401)を返すことを確認(=ネットワーク到達性
+    はOK)。
+  - `npm test`(18 tests green)で回帰なしを確認。
+- 未解決事項なし。GitHub Issueに紐づく作業ではないため、Issueエビデンス添付は対象外。
+

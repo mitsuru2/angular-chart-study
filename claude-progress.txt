@@ -136,3 +136,28 @@
   実行して代行した。`reporter` サブエージェント自体の動作確認は次回セッション以降に持ち越し。
   本セッションの変更はアプリの `feature-list.json` 記載の機能(bar-chart等)には該当しない
   ワークフロー/ツール整備のため、`feature-list.json` の更新は無し。
+
+## 2026-08-30 - GitHub Issue #10 動作確認: 作業ブランチ/PRワークフローの検証
+
+- Issue #10は、前回セッション(コミット `ba90b05`, PR #11)で既に実装済みだった「作業ブランチ作成
+  → PR作成」ワークフロー(`scripts/start-work-branch.sh` / `scripts/commit-push-pr.sh` /
+  `reporter`サブエージェント)を追跡するチケットだったため、本セッションでは新規コード変更ではなく
+  動作確認とレポーティングのみを実施した。
+- 動作確認内容:
+  - `bash -n` で `scripts/start-work-branch.sh` / `scripts/commit-push-pr.sh` の構文を再確認。
+  - ラベル→type判定を実Issueに対して確認: #10(`enhancement`)→`feat`、#8(`bug`)→`fix`、
+    #9(ラベルなし)→呼び出し側指定のフォールバック。いずれも設計通り。
+  - `scripts/start-work-branch.sh none feat` を実行し、既に対象ブランチ
+    (`feat/2026-08-30/claude-code`、今日の日付と一致)上にいる場合は再作成・再フェッチをせず
+    即座に成功終了することを確認(`git status --short` に差分なし、副作用なし)。
+  - `gh pr list --head feat/2026-08-30/claude-code --state open` で、`commit-push-pr.sh` が
+    参照する「既存オープンPR」検知ロジックがPR #11を正しく検知することを確認し、重複PR作成が
+    起きない実装であることをスクリプト該当箇所と合わせて確認した。
+  - `npm test`(18 tests green)を`init.sh`実行時に確認。
+- Issue #10 の受け入れ条件記載のブランチ名 `feat/issue-10/branch-control-by-claude` と、実際に
+  CLAUDE.md/スクリプトで確定した命名規則(`${type}/issue-<n>/claude-code`)との間に差異がある
+  ことをユーザーに確認し、「既存のPR #11をそのまま採用し、ブランチの作り直しは行わない」方針で
+  合意した。
+- PR #11 の本文に `Closes #10` を追記してIssue #10と正式に紐付け、検証結果のエビデンス
+  (ラベル→type判定、ブランチ再開パス、PR再利用判定の入出力ログ)をIssue #10にコメント添付した。
+- 未解決事項なし。

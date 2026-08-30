@@ -101,3 +101,38 @@
   付与する必要がある。今回のIssueの再現手順・受け入れ条件(`npm run e2e` 実行後の
   自動表示レポートへのアクセス)には影響しないため対応は見送ったが、必要であれば
   npm scriptを別途追加する等のフォローアップが考えられる。
+
+## 2026-08-30 - 作業ブランチ/PRワークフローの導入 と reporter サブエージェント新設
+
+- `CLAUDE.md` に新セクション「Working Branch & Pull Requests」を追加。以後、コード変更前に
+  必ず `scripts/start-work-branch.sh <issue-number|none> <feat|fix> [<base-branch>]` で
+  作業ブランチを作成/再開してからコミットするルールとした(`main` への直接コミットを禁止)。
+  ブランチ名は `${type}/${issue-number}/claude-code` 形式で機械的に決定
+  (例: `feat/issue-10/claude-code`, `fix/issue-322/claude-code`, `feat/2026-08-30/claude-code`)。
+  - `${type}` はIssueのラベルから優先順位 `enhancement`→`feat`, `bug`→`fix` で自動判定し、
+    ラベルなし/Issueなしの場合のみ呼び出し側(メインエージェント)が指定した `<feat|fix>` に
+    フォールバックする。
+  - `${issue-number}` はIssueがあれば `issue-<n>`、なければ現在日時ベースの `yyyy-MM-dd`。
+  - ベースブランチ未指定時は常に最新の `origin/main` から分岐。
+- `scripts/start-work-branch.sh` を新規作成(ブランチ名の機械的決定・作成・再開ロジック)。
+- `scripts/commit-push-pr.sh` を新規作成。指定ファイルのコミット・push・
+  オープン中PRの有無チェック(`gh pr list --head <branch> --state open`)・
+  未オープンならPR新規作成、を一括で行う。既にオープンPRがあれば重複作成しない。
+- 新規サブエージェント `.claude/agents/reporter.md` を追加(`model: haiku`、低コストモデル)。
+  Session End Procedureの機械的な後処理((1)Issueエビデンスのzip化/アップロード/コメント、
+  (2) claude-progress.txt / feature-list.json の更新、(3) コミット・push・PR作成)を担当。
+  コミットメッセージ・進捗ログ本文・PRタイトル/本文などの「何を書くか」の判断は一切行わず、
+  メインエージェントから渡された内容をそのまま実行するだけの設計(判断はメイン側に集約)。
+- `CLAUDE.md` の Session End Procedure を、上記に合わせて再構成
+  (step1: npm test は従来通りメインが実施 / step2: 進捗ログ・feature-list更新内容・
+  コミットメッセージ・PRタイトル/本文などをメインが起草 / step3: reporter サブエージェントに
+  実行を委譲)。
+- 動作確認: 本セッションの変更自体をこの新フローで運用し、`scripts/start-work-branch.sh none feat`
+  で `feat/2026-08-30/claude-code` ブランチを作成(このIssueなし・新機能追加のケース)。
+  `npm test`(18 tests green)を確認。
+- 未解決事項: `reporter` サブエージェントは本セッション中に新規作成したため、このセッション
+  自体ではエージェント定義がまだロードされておらず(セッション起動時に読み込まれる設計)、
+  今回のコミット・push・PR作成はメインエージェントが直接 `scripts/commit-push-pr.sh` を
+  実行して代行した。`reporter` サブエージェント自体の動作確認は次回セッション以降に持ち越し。
+  本セッションの変更はアプリの `feature-list.json` 記載の機能(bar-chart等)には該当しない
+  ワークフロー/ツール整備のため、`feature-list.json` の更新は無し。

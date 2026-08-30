@@ -5,6 +5,12 @@
       "status": "done",
       "description": "GitHub Issue #6: 複数パラメータの現在値を表示する棒グラフ(bar-chart)コンポーネントと、ダミーデータを生成する bar-chart-driver コンポーネント。Y軸は左側に1本のみ、固定/自動の2レンジモード対応、サイズは呼び出し側の style width/height で指定。",
       "updatedAt": "2026-08-29"
+    },
+    {
+      "name": "playwright-html-report-access",
+      "status": "done",
+      "description": "GitHub Issue #8: PlaywrightのHTMLテストレポートサーバー(ポート9323)がデフォルトでループバック(localhost)にのみバインドされコンテナ外からアクセスできなかった不具合を修正。playwright.config.tsのreporterにhost: '0.0.0.0'を指定し、angular.jsonのdev-server設定と同様に全インターフェースでリッスンするよう変更。",
+      "updatedAt": "2026-08-30"
     }
   ]
 }

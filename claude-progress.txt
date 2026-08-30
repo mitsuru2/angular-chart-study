@@ -72,3 +72,32 @@
 - テスト後の後片付けとして、Google Drive上のテスト用zip 2件をAPI経由で削除。
 - `npm test`(18 tests green)で回帰なしを確認。
 - 未解決事項なし。GitHub Issue起点の修正作業の際は、今回整備したフローで実運用可能な状態。
+
+## 2026-08-30 - GitHub Issue #8: Playwrightのテストレポートにアクセスできない
+
+- 原因調査: `npm run e2e`(`ng e2e` → playwright-ng-schematics のbuilder → 内部で
+  `npx playwright test` を子プロセスとして起動)完了時、`html` reporter がデフォルトの
+  `host: "localhost"` でHTMLレポートサーバー(ポート9323)を起動していた。この
+  バインド先はループバック(`::1`)のみで、コンテナ外(ホストPCのブラウザ/curl)から
+  到達不可。`angular.json` の dev-server が同じ理由で `host: "0.0.0.0"` を明示指定して
+  いるのと全く同じ構図(このコンテナ環境ではポート公開がループバック非対応)。
+  実機確認: `/proc/net/tcp6` で `00000000000000000000000001000000:246B`(`::1:9323`)の
+  リッスンを確認し、原因を特定。
+- 修正: `playwright.config.ts` の `reporter: 'html'` を
+  `reporter: [['html', { host: '0.0.0.0' }]]` に変更。これにより `npm run e2e` 完了後に
+  自動オープンされるレポートサーバー、および `npx playwright show-report --host 0.0.0.0`
+  で手動再表示する場合の双方が全インターフェース(`0.0.0.0`)でリッスンするようになる。
+- 動作確認: `npx playwright show-report --host 0.0.0.0` 実行中に `/proc/net/tcp` で
+  `00000000:246B`(`0.0.0.0:9323`)のリッスンおよび `curl http://127.0.0.1:9323/` が
+  200を返すことを確認(修正前は `0100007F`=ループバックのみでリッスンしていたことも
+  併せて確認・記録)。`npm test`(18 tests green)、`npm run build` も回帰なし。
+- Issue本文に明記の通り、既存e2eテスト自体の失敗(dev server未起動によるもの)は
+  本作業の対象外(修正していない)。
+- テストエビデンス(バインドアドレスのbefore/after比較とcurl結果)をGoogle Drive経由で
+  Issue #8にコメント添付済み。
+- 未解決事項: `npx playwright show-report` をユーザーが手動実行する場合、CLIの
+  `--host` デフォルトは`localhost`のまま(playwright.config.tsのreporter設定を
+  読まない、Playwright側の仕様)なので、その場合は `--host 0.0.0.0` を明示的に
+  付与する必要がある。今回のIssueの再現手順・受け入れ条件(`npm run e2e` 実行後の
+  自動表示レポートへのアクセス)には影響しないため対応は見送ったが、必要であれば
+  npm scriptを別途追加する等のフォローアップが考えられる。

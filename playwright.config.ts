@@ -20,7 +20,10 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env['CI'] ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  /* host: '0.0.0.0' so the report server is reachable from outside the devcontainer
+   * (the default 'localhost' binds to loopback only, matching why angular.json's
+   * serve target also sets host: "0.0.0.0"). */
+  reporter: [['html', { host: '0.0.0.0' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */

@@ -1,7 +1,7 @@
 {
   "permissions": {
     "defaultMode": "bypassPermissions",
-    "allow": ["Edit(src/**)"],
+    "allow": ["Edit(src/**)", "Bash(npx ng *)", "Bash(npx playwright *)"],
     "deny": [
       "Edit(.claude/settings.json)",
       "Edit(.angular/**)",

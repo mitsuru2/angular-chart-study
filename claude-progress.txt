@@ -53,3 +53,22 @@
   では未設定・未実施(手順は `scripts/attach-issue-evidence.sh` のヘッダーコメントに記載)。
   実際のGoogle Driveアップロード〜Issueコメント投稿のエンドツーエンド確認は、その設定完了後に
   別途実施が必要。
+
+## 2026-08-30 - Google Drive OAuth設定 & attach-issue-evidence.sh のエンドツーエンド確認
+
+- ユーザーがGoogle Cloud ConsoleでOAuthクライアント(ウェブアプリケーション種別。デスクトップ
+  アプリ種別だとOAuth Playgroundの `redirect_uri_mismatch` エラーになるため変更)を作成し、
+  OAuth Playground経由で `drive.file` スコープのrefresh tokenを取得、`.devcontainer/secrets.env`
+  に `GDRIVE_CLIENT_ID` / `GDRIVE_CLIENT_SECRET` / `GDRIVE_REFRESH_TOKEN` / `GDRIVE_FOLDER_ID`
+  を設定してコンテナを再起動。
+- `bash scripts/init-verify-gdrive.sh` で疎通確認 (`mitsuru.takahashi.biz@gmail.com` として認可済み)。
+- テスト用Issue(#9、確認後クローズ済み)を作成し、ダミーの `tc1`(PNGスクリーンショット想定)/
+  `tc2`(入出力パターンのテキスト)フォルダで `scripts/attach-issue-evidence.sh` をエンドツー
+  エンドで実行。zip化 → Google Driveアップロード → リンク共有設定(認証なしでHTTP 200到達を確認)
+  → Issueへの1コメント投稿、まで正常動作を確認。
+- 実行時に `zip` コマンドがコンテナイメージに含まれていないことが判明したため、`sudo apt-get
+  install zip` でその場対応しつつ、`Dockerfile` にも `zip` を恒久的に追加(次回イメージ再ビルド時
+  も確実に使えるように)。
+- テスト後の後片付けとして、Google Drive上のテスト用zip 2件をAPI経由で削除。
+- `npm test`(18 tests green)で回帰なしを確認。
+- 未解決事項なし。GitHub Issue起点の修正作業の際は、今回整備したフローで実運用可能な状態。

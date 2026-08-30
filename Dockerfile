@@ -17,6 +17,8 @@ FROM node:26-trixie-slim
 #            restrict outbound network access to an allowlist (github.com, anthropic.com)
 #            for Claude Code sessions.
 # - gnupg: Required to import the GitHub CLI apt repository signing key below.
+# - zip: Required by scripts/attach-issue-evidence.sh to package GitHub Issue test
+#            evidence before uploading it to Google Drive.
 # Note: After installing packages, we clean up the apt cache to reduce the image size.
 RUN apt-get update && apt-get install -y \
     git \
@@ -29,6 +31,7 @@ RUN apt-get update && apt-get install -y \
     ipset \
     dnsutils \
     jq \
+    zip \
     && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
     && locale-gen \
     && rm -rf /var/lib/apt/lists/*

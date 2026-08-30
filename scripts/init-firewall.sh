@@ -84,6 +84,21 @@ else
   echo "  WARNING: could not fetch https://api.github.com/meta, relying on DNS-resolved IPs only" >&2
 fi
 
+# oauth2.googleapis.com / www.googleapis.com sit behind Google's frontend pool,
+# which rotates across many IPs on a short DNS TTL (a few minutes). Pinning
+# whatever single IP happened to resolve at init time goes stale mid-session,
+# so allow Google's whole published frontend range instead (same rationale as
+# the GitHub ranges above).
+echo "=== init-firewall: adding Google's published IP ranges (gstatic.com/ipranges/goog.json) ==="
+goog_ranges="$(curl -fsSL --max-time 10 https://www.gstatic.com/ipranges/goog.json || true)"
+if [ -n "$goog_ranges" ]; then
+  echo "$goog_ranges" | jq -r '.prefixes[].ipv4Prefix // empty' 2>/dev/null | while IFS= read -r cidr; do
+    ipset add allowed-domains "$cidr" 2>/dev/null || true
+  done
+else
+  echo "  WARNING: could not fetch https://www.gstatic.com/ipranges/goog.json, relying on DNS-resolved IPs only" >&2
+fi
+
 echo "=== init-firewall: applying allowlist and default-deny policy ==="
 iptables -A OUTPUT -m set --match-set allowed-domains dst -j ACCEPT
 iptables -A OUTPUT -j DROP

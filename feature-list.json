@@ -11,6 +11,12 @@
       "status": "done",
       "description": "GitHub Issue #8: PlaywrightのHTMLテストレポートサーバー(ポート9323)がデフォルトでループバック(localhost)にのみバインドされコンテナ外からアクセスできなかった不具合を修正。playwright.config.tsのreporterにhost: '0.0.0.0'を指定し、angular.jsonのdev-server設定と同様に全インターフェースでリッスンするよう変更。",
       "updatedAt": "2026-08-30"
+    },
+    {
+      "name": "echarts-color-sample",
+      "status": "done",
+      "description": "GitHub Issue #13: ECharts の既定カラーパレットを調査するための EChartsColorSample コンポーネント。色を指定しない10系列の静的な棒グラフを描画し、既定パレットの割り当て色を目視確認できる。クリック不要のため各系列に cursor: 'default' を設定し、マウスオーバーしてもカーソルが変化しないようにしている。",
+      "updatedAt": "2026-09-01"
     }
   ]
 }

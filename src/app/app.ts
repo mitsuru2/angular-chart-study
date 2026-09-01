@@ -25,5 +25,6 @@ export class App {
     { label: 'Normal Line Chart', id: 'normal-line-chart' },
     { label: 'Cylinder Chart Grid', id: 'cylinder-chart-grid' },
     { label: 'Bar Chart', id: 'bar-chart' },
+    { label: 'ECharts Color Sample', id: 'echarts-color-sample' },
   ];
 }

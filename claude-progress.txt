@@ -187,3 +187,28 @@
   - `npm test`(18 tests green)で回帰なしを確認。
 - 未解決事項なし。GitHub Issueに紐づく作業ではないため、Issueエビデンス添付は対象外。
 
+## 2026-09-01 - GitHub Issue #13: EChartsのデフォルトのブラシカラーの調査
+
+- `EChartsColorSample`(セレクタ `app-echarts-color-sample`)コンポーネントを新規作成
+  (`src/app/echarts-color-sample/`)。既存の bar-chart 系コンポーネントとは異なり、目的が
+  「ECharts既定カラーパレットの目視確認」のみで動的な入力を必要としないため、driver分離は
+  行わず、静的な10系列(`series`配列に10要素)を内部に持つ単一コンポーネントとして実装。
+  各系列は `itemStyle.color` を指定せず、ECharts自身の既定パレット割り当てに任せている。
+  値は全系列で揃え(`data: [1]`)、色の比較に集中できるようにした。
+  クリック不要のため各系列に `cursor: 'default'` を指定し、既定の `'pointer'` への変化を防止。
+- 調査結果: ECharts既定パレットは9色構成(10色ではない)であることが判明。10系列描画すると
+  10本目のバーは1本目と同じ色にループする(Playwrightスクリーンショットで1本目・10本目が
+  同じ青色になることを確認)。
+- ルーティング(`app.routes.ts`)とナビゲーション(`app.ts`)に `echarts-color-sample` パスを追加。
+- 動作確認: `npm test`(19 tests green)、`npm run build` に加え、Playwright で dev server 上の
+  `/echarts-color-sample` をスクリーンショット・aria-label・role="img"・コンソールエラーなしを
+  確認。バー領域上へのマウスオーバー時、canvas の computed cursor style が `'default'` のまま
+  変化しないことも確認済み。axe-core によるAXEチェックも実施し、検出された違反
+  (`color-contrast`/`landmark-one-main`/`page-has-heading-one`/`region`)はいずれも既存の
+  `/bar-chart` ページ等でも同様に発生するアプリシェル全体(ナビゲーションボタン配色、
+  `<main>`ランドマーク欠如)由来の既存問題であり、本コンポーネント固有の新規違反ではないことを
+  比較確認した。
+- テストエビデンス(色サンプルのスクリーンショット、カーソル挙動のPlaywright実行結果)を
+  Google Drive経由でIssue #13にコメント添付済み。
+- 未解決事項: 上記AXE違反(アプリシェル全体の色コントラスト/ランドマーク不足)は本Issueの
+  スコープ外のため未対応。別Issueとして切り出すことを検討の余地あり。

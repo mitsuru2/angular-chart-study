@@ -54,4 +54,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./bar-chart-driver/bar-chart-driver').then((m) => m.BarChartDriver),
   },
+  {
+    path: 'echarts-color-sample',
+    loadComponent: () =>
+      import('./echarts-color-sample/echarts-color-sample').then((m) => m.EChartsColorSample),
+  },
 ];
